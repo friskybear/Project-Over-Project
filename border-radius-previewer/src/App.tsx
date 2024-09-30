@@ -1,51 +1,75 @@
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
-import { createEffect, createSignal, For, on } from "solid-js";
+import { createEffect, createSignal, For, Index, on, onMount } from "solid-js";
 import { debounce } from "lodash";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+
+const writeToClipboard = async (arr: number[]) => {
+  await writeText(
+    `"border-radius": ${arr[0]}% ${arr[1]}% ${arr[2]}% ${arr[3]}% / ${arr[4]}% ${arr[5]}% ${arr[6]}% ${arr[7]}%`
+  );
+};
 function App() {
   const [percentages, setPercentages] = createSignal<number[]>(
-    Array.from({ length: 8 }).map((_) => Math.floor(Math.random() * 100))
+    Array.from({ length: 8 }).map((_) => Math.floor(Math.random() * 100)),
+    { equals: false }
   );
-  const not_so_reactive = percentages();
+  onMount(() => {
+    // Update all range inputs
+    for (let i = 0; i < 8; i++) {
+      const input = document.getElementById(i.toString()) as HTMLInputElement;
+      if (input) {
+        input.value = percentages()[i].toString();
+      }
+    }
+  });
 
-  const handleChange = (e: Event) => {
-    const element = e.currentTarget as HTMLInputElement;
-    const index = Number.parseInt(element.id);
-    const value = Number.parseInt(element.value);
-    console.log("Das");
+  const handleChange = debounce((e: HTMLInputElement) => {
+    const index = Number.parseInt(e.id);
+    const value = Number.parseInt(e.value);
     setPercentages((prev) => {
-      const newPercentages = [...prev];
-      newPercentages[index] = value;
-      return newPercentages;
+      prev[index] = value;
+      return prev;
     });
-  };
+  }, 2);
 
   return (
     <>
-      <header class="h-10 bg-accent-500 flex justify-center items-center">
+      <header class="h-10 bg-accent-500 flex justify-center items-center select-none">
         <h1>Border-radius Previewer</h1>
       </header>
-      <main class="bg-red-600 relative">
+      <main class="relative m-5">
+        <button
+          class="btn btn-primary btn-square w-20 ml-[20dvh] mt-20"
+          onclick={() => {
+            writeToClipboard(percentages());
+          }}
+          type="button"
+        >
+          Copy
+        </button>
         <ul class="flex flex-col w-80  gap-2 -rotate-90 fixed top-52 ">
-          <For each={percentages()}>
+          <Index each={percentages()}>
             {(item, index) => (
-              <section class="flex">
+              <section class="flex ">
                 <input
-                  id={index().toString()}
-                  onInput={handleChange}
+                  id={index.toString()}
+                  onInput={(e) => handleChange(e.currentTarget)}
                   type="range"
-                  class="range h-6 w-[100%]"
+                  class="range range-lg "
                   min="0"
                   step={1}
                   max="100"
                 />
-                <h1 class="p-1 rotate-90 ">{item}</h1>
+                <h1 class="p-1 w-8 h-8 rotate-90 align-middle flex justify-center select-none">
+                  {item()}
+                </h1>
               </section>
             )}
-          </For>
+          </Index>
         </ul>
         <div
-          class="fixed h-[75dvh] w-[75dvh] top-24 left-[55dvh] bg-red-700"
+          class="fixed h-[70dvh] w-[70dvh] top-24 left-[60dvh] bg-red-700"
           style={{
             "border-radius": `${percentages()[0]}% ${percentages()[1]}% ${
               percentages()[2]
@@ -54,7 +78,7 @@ function App() {
             }% ${percentages()[6]}% ${percentages()[7]}%`,
           }}
         >
-          l
+          {}
         </div>
       </main>
     </>
