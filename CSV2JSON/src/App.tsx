@@ -18,7 +18,7 @@ function App() {
                   console.error("Error:", res);
                   set_json("Error parsing CSV to JSON.");
                 } else {
-                  set_json(JSON.parse(res as string));
+                  set_json(JSON.stringify(JSON.parse(res as string), null, 2));
                 }
               }
             );
@@ -29,7 +29,7 @@ function App() {
         <textarea
           name="JSON"
           id="JSON"
-          class="textarea textarea-bordered textarea-primary h-[40dvh] w-full"
+          class="textarea textarea-bordered textarea-primary h-[40dvh] w-full overflow-y-scroll"
           readOnly
         >
           {json()}

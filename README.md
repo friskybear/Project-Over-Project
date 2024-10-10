@@ -9,3 +9,5 @@ implemented Project's
 - CauseEffect(Skipped)
 - Color-cycle(Skipped)
 - Countdown-timer(Skipped)
+- CSV2JSON
+- Dollars-to-cents
